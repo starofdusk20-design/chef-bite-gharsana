@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chef Bite Gharsana — Order Online</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff8f1;color:#171717}
+header{position:sticky;top:0;z-index:10;background:#111;color:#fff;padding:14px 5%;display:flex;justify-content:space-between;align-items:center}.logo{font-size:28px;font-weight:900}.logo b{color:#ef2b2b}
+button{cursor:pointer;border:0}.cart{background:#ef2b2b;color:#fff;border-radius:25px;padding:11px 17px;font-weight:800}
+.hero{padding:70px 6%;background:linear-gradient(120deg,#080808,#35100b);color:#fff}.hero h1{font-size:clamp(45px,8vw,80px);line-height:.95;margin:0 0 20px}.hero h1 span{color:#f32d2d}.hero p{max-width:650px;color:#ddd;font-size:18px;line-height:1.6}.cta{background:#ef2b2b;color:#fff;padding:14px 22px;border-radius:25px;font-weight:900;margin-top:12px}
+main{max-width:1180px;margin:auto;padding:45px 5%}.cats{display:flex;gap:8px;overflow:auto;margin:20px 0}.cats button{white-space:nowrap;background:#fff;border:1px solid #ddd;padding:10px 15px;border-radius:20px}.cats .on{background:#111;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.item{background:#fff;border:1px solid #eee;border-radius:16px;padding:17px;box-shadow:0 5px 20px #0000000d}.item h3{margin:0 0 6px;font-size:17px}.tag{color:#888;font-size:11px;text-transform:uppercase}.price{color:#e32626;font-weight:900;font-size:18px;margin-top:12px}.add{width:100%;background:#111;color:#fff;padding:10px;border-radius:10px;margin-top:13px;font-weight:800}.add:hover{background:#ef2b2b}
+.overlay{display:none;position:fixed;inset:0;background:#0009;z-index:20}.overlay.show{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(460px,100%);background:#fff;padding:22px;overflow:auto}.close{float:right;background:#eee;border-radius:50%;width:35px;height:35px}.ci{padding:13px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:10px}.qty button{background:#eee;border-radius:5px;padding:3px 9px}.total{font-size:21px;font-weight:900;padding:20px 0}.form input,.form textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;margin:5px 0;font:inherit}.form textarea{min-height:75px}.place{width:100%;padding:14px;border-radius:10px;background:#20b45a;color:#fff;font-weight:900;margin-top:8px}.small{font-size:12px;color:#777;line-height:1.5}
+footer{background:#111;color:#bbb;text-align:center;padding:28px}.phones{color:#fff;margin-top:8px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:550px){.grid{grid-template-columns:1fr}.hero{padding:55px 5%}}
+</style>
+</head>
+<body>
+<header><div class="logo">Chef <b>Bite</b> <span style="font-size:14px;color:#ddd">Gharsana</span></div><button class="cart" onclick="openCart()">🛒 Cart (<span id="count">0</span>)</button></header>
+<section class="hero"><h1>Good food.<br><span>Good mood.</span></h1><p>Order burgers, pizza, pasta, Chinese food, shakes, snacks and more from Chef Bite.</p><button class="cta" onclick="document.querySelector('#menu').scrollIntoView()">Order Now</button></section>
+<main id="menu"><h2>Our Menu</h2><div class="cats" id="cats"></div><div class="grid" id="grid"></div></main>
+<footer><b>Chef Bite Gharsana</b><div class="phones">7982218531 &nbsp;•&nbsp; 7725970606</div></footer>
+
+<div class="overlay" id="ov"><div class="drawer"><button class="close" onclick="closeCart()">✕</button><h2>Your Cart</h2><div id="cartItems"></div><div class="total">Total: ₹<span id="total">0</span></div>
+<button class="add" onclick="closeCart()">+ Add More Items</button>
+<div class="form"><input id="name" placeholder="Name"><input id="phone" placeholder="Phone number"><textarea id="address" placeholder="Delivery address"></textarea><textarea id="extras" placeholder="Extra instructions (optional)"></textarea>
+<button class="place" onclick="placeOrder()">Place Order</button><p class="small">The order is saved to your order system and can also be sent to Chef Bite's WhatsApp. The online database needs the Apps Script URL in CONFIG below.</p></div></div></div>
+
+<script>
+const WA="917982218531";
+const items=[
+["Veg Burger","Burger",49],["Cheese Burger","Burger",69],["Paneer Crispi","Burger",79],["Double Decker","Burger",99],["Giga Bite","Burger",99],["Paneer Veg Mountain","Burger",109],
+["Warmak Sandwich","Sandwich",109],["Cheese Corn Sandwich","Sandwich",109],["Tandoori Sandwich","Sandwich",119],["Paneer Tikka Sandwich","Sandwich",129],["Cheese Sandwich","Sandwich",129],["Cheese Loaded Sandwich","Sandwich",179],
+["White Sauce","Pasta",119],["Red Sauce","Pasta",119],["Tandoori","Pasta",129],["Mix Pasta","Pasta",139],["Makhani Pasta","Pasta",149],
+["Classic","Fries",99],["Peri-Peri","Fries",109],["Peri Peri Cheese","Fries",129],["Cheese Loaded","Fries",129],
+["Plain Maggi","Snacks",69],["Veg. Maggi","Snacks",79],["Tandoori Maggi","Snacks",99],["Cheese Maggi","Snacks",99],["Sweet Corn","Snacks",99],["Paneer Sweet Corn","Snacks",139],["Veg. Crunch","Snacks",169],["Cheese Bol","Snacks",229],
+["Mint Mojito","Mocktail",79],["Blue Berry","Mocktail",99],["Green Apple","Mocktail",99],["Water melon","Mocktail",99],
+["Cheese Garlic Bread","Garlic Bread",129],["Yoti Garlic Bread","Garlic Bread",139],
+["Vanila","Ice Cream",59],["Strawberry","Ice Cream",59],["Chocolate","Ice Cream",59],["Butter Scotch","Ice Cream",59],
+["Vanila","Shake",89],["Strawberry","Shake",99],["Butter Scotch","Shake",99],["Chocolate","Shake",99],["Cold Coffee","Shake",99],["Kitkat","Shake",109],["Oreo Shake","Shake",109],["Bubble Gum","Shake",109],
+["300 ML","Soft Drink",29],["400 ML","Soft Drink",39],["Hot Coffee","Soft Drink",59],
+["Margherita Pizza","Pizza",139],["Onion Pizza","Pizza",159],["Cheese Corn Pizza","Pizza",159],["Veg. Garden Pizza","Pizza",169],["Mexican Pizza","Pizza",179],["Tandoori Pizza","Pizza",189],["Paneer Tikka Pizza","Pizza",199],["Punjabi Pizza","Pizza",199],["Makhani Pizza","Pizza",199],["Tomato Pizza","Pizza",199],["Chaap Paneer Pizza","Pizza",219],["Sweet Corn Paneer Pizza","Pizza",219],
+["Veg. ChowMein","Chinese",79],["Chilli Garlic Noodle","Chinese",89],["Cheese Paneer ChowMein","Chinese",119],["Chilli Potato","Chinese",129],["Honey Chilli Potato","Chinese",149],["Paneer Snacks","Chinese",169],["Chilli Paneer","Chinese",229],
+["Margherita","Pizza Sandwich",89],["Cheese Corn","Pizza Sandwich",109],["Paneer Tikka","Pizza Sandwich",129],
+["Veg. Wrap","Wrap",109],["Paneer Wrap","Wrap",119],["Paneer Grill Wrap","Wrap",119],["Cheese Wrap","Wrap",129],
+["Kulhad Pizza","Special",99],["Chef Bite Special Pizza - Medium","Special",229],["Chef Bite Special Pizza - Large","Special",349],
+["Combo: Sandwich + Burger + Coca Cola 750ml","Combo",199],["Combo: Fries + Medium Pizza + Coca Cola 750ml","Combo",399]
+];
+let cart={};const cats=["All",...new Set(items.map(x=>x[1]))];
+function renderCats(){catsEl.innerHTML=cats.map((c,i)=>`<button class="${i?'':'on'}" onclick="filter('${c}',this)">${c}</button>`).join("")}
+function render(c="All"){const list=c==="All"?items:items.filter(x=>x[1]===c);grid.innerHTML=list.map(x=>`<article class="item"><h3>${x[0]}</h3><div class="tag">${x[1]}</div><div class="price">₹${x[2]}</div><button class="add" onclick="add(${items.indexOf(x)})">+ Add</button></article>`).join("")}
+function filter(c,b){document.querySelectorAll(".cats button").forEach(x=>x.classList.remove("on"));b.classList.add("on");render(c)}
+function add(i){cart[i]=(cart[i]||0)+1;update();openCart()}
+function change(i,d){cart[i]=(cart[i]||0)+d;if(cart[i]<=0)delete cart[i];update()}
+function update(){let n=0,t=0;Object.entries(cart).forEach(([i,q])=>{n+=q;t+=items[i][2]*q});count.textContent=n;total.textContent=t;cartItems.innerHTML=n?Object.entries(cart).map(([i,q])=>`<div class="ci"><div><b>${items[i][0]}</b><div class="qty"><button onclick="change(${i},-1)">−</button> ${q} <button onclick="change(${i},1)">+</button></div></div><b>₹${items[i][2]*q}</b></div>`).join(""):'<p style="color:#777;text-align:center;padding:30px">Cart is empty 🍕</p>'}
+function openCart(){ov.classList.add("show");update()}function closeCart(){ov.classList.remove("show")}
+function placeOrder(){
+ if(!Object.keys(cart).length)return alert("Your cart is empty.");
+ const customer={name:name.value.trim(),phone:phone.value.trim(),address:address.value.trim(),extras:extras.value.trim()};
+ if(!customer.name||!customer.phone||!customer.address)return alert("Please fill name, phone and address.");
+ const order={orderId:"CB-"+Date.now(),items:Object.entries(cart).map(([i,q])=>({name:items[i][0],qty:q,price:items[i][2],subtotal:q*items[i][2]})),total:Object.entries(cart).reduce((s,[i,q])=>s+items[i][2]*q,0)};
+ const lines=order.items.map(x=>`• ${x.name} x${x.qty} = ₹${x.subtotal}`).join("\n");
+ const msg=`Hello Chef Bite Gharsana! 🍔
+
+*NEW ORDER*
+Order ID: ${order.orderId}
+
+*Items:*
+${lines}
+
+*Total: ₹${order.total}*
+
+Name: ${customer.name}
+Phone: ${customer.phone}
+Address: ${customer.address}
+
+${customer.extras ? "Extra: "+customer.extras : ""}`;
+ window.location.href=`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+}
+const catsEl=document.getElementById("cats"),grid=document.getElementById("grid"),count=document.getElementById("count"),total=document.getElementById("total"),cartItems=document.getElementById("cartItems"),ov=document.getElementById("ov");
+renderCats();render();update();
+</script>
+</body></html>
